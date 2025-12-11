@@ -356,7 +356,7 @@ async function executeQuery(query: any, userId: string, userRole: string): Promi
   const { data_source, query_config } = query;
 
   // Apply RBAC filters based on user role
-  let baseQuery = supabaseAdmin.from(data_source).select('*');
+  let baseQuery: any = supabaseAdmin.from(data_source).select('*');
 
   // Apply visibility filters for External Agency users
   if (userRole === UserRole.EXTERNAL_AGENCY) {
@@ -428,7 +428,7 @@ async function executeQuery(query: any, userId: string, userRole: string): Promi
   // Apply aggregations if specified
   if (query_config?.aggregations && data) {
     // Simple aggregation logic (can be enhanced)
-    const aggregated = query_config.aggregations.map(agg => {
+    const aggregated = query_config.aggregations.map((agg: { field: string; type: string; alias?: string }) => {
       const values = data.map((row: any) => row[agg.field]).filter((v: any) => v != null);
       let result: number = 0;
 

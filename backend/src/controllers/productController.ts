@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { supabaseAdmin } from '../config/supabase';
 import { logActivity } from '../utils/audit';
 import { getVisibleProductsForExternalAgency } from '../utils/visibility';
-import { UserRole } from '../types';
+import { UserRole, AuthenticatedRequest } from '../types';
 
-export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+export const getProducts = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -61,7 +61,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
+export const createProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -98,7 +98,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -139,7 +139,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;

@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { supabaseAdmin } from '../config/supabase';
 import { logActivity } from '../utils/audit';
 import { getVisibleProjectsForExternalAgency } from '../utils/visibility';
-import { UserRole } from '../types';
+import { UserRole, AuthenticatedRequest } from '../types';
 
-export const getProjects = async (req: Request, res: Response, next: NextFunction) => {
+export const getProjects = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -115,7 +115,7 @@ export const getProjects = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const getProjectById = async (req: Request, res: Response, next: NextFunction) => {
+export const getProjectById = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
@@ -137,7 +137,7 @@ export const getProjectById = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const createProject = async (req: Request, res: Response, next: NextFunction) => {
+export const createProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -177,7 +177,7 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateProject = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -255,7 +255,7 @@ export const updateProject = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const deleteProject = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteProject = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -284,7 +284,7 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateProjectPriorities = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProjectPriorities = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -316,7 +316,7 @@ export const updateProjectPriorities = async (req: Request, res: Response, next:
 
     await Promise.all(updatePromises);
 
-    await logActivity(userId, 'project_priorities_updated', 'projects', null, {
+    await logActivity(userId, 'project_priorities_updated', 'projects', 'bulk', {
       count: priorities.length
     });
 
@@ -327,7 +327,7 @@ export const updateProjectPriorities = async (req: Request, res: Response, next:
 };
 
 // Project Labels
-export const getProjectLabels = async (req: Request, res: Response, next: NextFunction) => {
+export const getProjectLabels = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
@@ -344,7 +344,7 @@ export const getProjectLabels = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const addProjectLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const addProjectLabel = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const { label_id } = req.body;
@@ -363,7 +363,7 @@ export const addProjectLabel = async (req: Request, res: Response, next: NextFun
   }
 };
 
-export const removeProjectLabel = async (req: Request, res: Response, next: NextFunction) => {
+export const removeProjectLabel = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id, label_id } = req.params;
 
