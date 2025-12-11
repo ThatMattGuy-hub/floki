@@ -7,7 +7,8 @@
           <img 
             :src="colorMode.value === 'dark' ? '/flokidark.png' : '/floki.png'" 
             alt="Floki" 
-            class="h-8 w-auto"
+            class="w-auto"
+            style="margin: auto"
           />
         </NuxtLink>
       </div>
