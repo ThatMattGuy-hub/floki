@@ -35,13 +35,13 @@ export const createCustomField = asyncHandler(async (req: AuthenticatedRequest, 
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'custom_field',
-    entity_id: data.id,
-    details: `Created custom field: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'custom_field',
+    data.id,
+    { details: `Created custom field: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -64,13 +64,13 @@ export const updateCustomField = asyncHandler(async (req: AuthenticatedRequest, 
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'custom_field',
-    entity_id: id,
-    details: `Updated custom field: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'custom_field',
+    id,
+    { details: `Updated custom field: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -90,13 +90,13 @@ export const deleteCustomField = asyncHandler(async (req: AuthenticatedRequest, 
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'custom_field',
-    entity_id: id,
-    details: 'Deleted custom field'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'custom_field',
+    id,
+    { details: 'Deleted custom field' }
+  );
 
   res.json({
     success: true,
@@ -197,13 +197,13 @@ export const createAutomation = asyncHandler(async (req: AuthenticatedRequest, r
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'automation',
-    entity_id: data.id,
-    details: `Created automation: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'automation',
+    data.id,
+    { details: `Created automation: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -226,13 +226,13 @@ export const updateAutomation = asyncHandler(async (req: AuthenticatedRequest, r
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'automation',
-    entity_id: id,
-    details: `Updated automation: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'automation',
+    id,
+    { details: `Updated automation: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -252,13 +252,13 @@ export const deleteAutomation = asyncHandler(async (req: AuthenticatedRequest, r
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'automation',
-    entity_id: id,
-    details: 'Deleted automation'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'automation',
+    id,
+    { details: 'Deleted automation' }
+  );
 
   res.json({
     success: true,
@@ -296,13 +296,13 @@ export const createApprovalWorkflow = asyncHandler(async (req: AuthenticatedRequ
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'approval_workflow',
-    entity_id: data.id,
-    details: `Created approval workflow: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'approval_workflow',
+    data.id,
+    { details: `Created approval workflow: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -325,13 +325,13 @@ export const updateApprovalWorkflow = asyncHandler(async (req: AuthenticatedRequ
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'approval_workflow',
-    entity_id: id,
-    details: `Updated approval workflow: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'approval_workflow',
+    id,
+    { details: `Updated approval workflow: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -351,13 +351,13 @@ export const deleteApprovalWorkflow = asyncHandler(async (req: AuthenticatedRequ
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'approval_workflow',
-    entity_id: id,
-    details: 'Deleted approval workflow'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'approval_workflow',
+    id,
+    { details: 'Deleted approval workflow' }
+  );
 
   res.json({
     success: true,
@@ -395,13 +395,13 @@ export const createSLARule = asyncHandler(async (req: AuthenticatedRequest, res:
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'sla_rule',
-    entity_id: data.id,
-    details: `Created SLA rule: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'sla_rule',
+    data.id,
+    { details: `Created SLA rule: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -424,13 +424,13 @@ export const updateSLARule = asyncHandler(async (req: AuthenticatedRequest, res:
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'sla_rule',
-    entity_id: id,
-    details: `Updated SLA rule: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'sla_rule',
+    id,
+    { details: `Updated SLA rule: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -450,13 +450,13 @@ export const deleteSLARule = asyncHandler(async (req: AuthenticatedRequest, res:
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'sla_rule',
-    entity_id: id,
-    details: 'Deleted SLA rule'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'sla_rule',
+    id,
+    { details: 'Deleted SLA rule' }
+  );
 
   res.json({
     success: true,
@@ -512,13 +512,13 @@ export const saveEmailSettings = asyncHandler(async (req: AuthenticatedRequest, 
     data = created;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'email_settings',
-    entity_id: data.id,
-    details: 'Updated email settings'
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'email_settings',
+    data.id,
+    { details: 'Updated email settings' }
+  );
 
   res.json({
     success: true,
@@ -787,13 +787,13 @@ export const createProjectStatus = asyncHandler(async (req: AuthenticatedRequest
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'project_status',
-    entity_id: data.id,
-    details: `Created project status: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'project_status',
+    data.id,
+    { details: `Created project status: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -833,13 +833,13 @@ export const updateProjectStatus = asyncHandler(async (req: AuthenticatedRequest
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'project_status',
-    entity_id: id,
-    details: `Updated project status: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'project_status',
+    id,
+    { details: `Updated project status: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -873,13 +873,13 @@ export const deleteProjectStatus = asyncHandler(async (req: AuthenticatedRequest
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'project_status',
-    entity_id: id,
-    details: 'Deleted project status'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'project_status',
+    id,
+    { details: 'Deleted project status' }
+  );
 
   res.json({
     success: true

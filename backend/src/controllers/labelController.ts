@@ -33,13 +33,13 @@ export const createLabel = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'label',
-    entity_id: data.id,
-    details: `Created label: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'label',
+    data.id,
+    { details: `Created label: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -62,13 +62,13 @@ export const updateLabel = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'label',
-    entity_id: id,
-    details: `Updated label: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'label',
+    id,
+    { details: `Updated label: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -88,13 +88,13 @@ export const deleteLabel = asyncHandler(async (req: AuthenticatedRequest, res: R
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'label',
-    entity_id: id,
-    details: 'Deleted label'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'label',
+    id,
+    { details: 'Deleted label' }
+  );
 
   res.json({
     success: true,
