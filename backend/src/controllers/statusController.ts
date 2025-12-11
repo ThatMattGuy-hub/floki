@@ -33,13 +33,13 @@ export const createStatus = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'create',
-    entity_type: 'status',
-    entity_id: data.id,
-    details: `Created status: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'create',
+    'status',
+    data.id,
+    { details: `Created status: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -62,13 +62,13 @@ export const updateStatus = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'update',
-    entity_type: 'status',
-    entity_id: id,
-    details: `Updated status: ${name}`
-  });
+  await logActivity(
+    req.user!.id,
+    'update',
+    'status',
+    id,
+    { details: `Updated status: ${name}` }
+  );
 
   res.json({
     success: true,
@@ -88,13 +88,13 @@ export const deleteStatus = asyncHandler(async (req: AuthenticatedRequest, res: 
     throw error;
   }
 
-  await logActivity({
-    actor_id: req.user!.id,
-    action: 'delete',
-    entity_type: 'status',
-    entity_id: id,
-    details: 'Deleted status'
-  });
+  await logActivity(
+    req.user!.id,
+    'delete',
+    'status',
+    id,
+    { details: 'Deleted status' }
+  );
 
   res.json({
     success: true,

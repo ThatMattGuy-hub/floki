@@ -90,15 +90,15 @@ export const isExternalAgency = (req: AuthenticatedRequest): boolean => {
 };
 
 export const canManageSettings = (req: AuthenticatedRequest): boolean => {
-  return req.user?.role && [UserRole.OWNER, UserRole.ADMIN].includes(req.user.role);
+  return !!req.user?.role && [UserRole.OWNER, UserRole.ADMIN].includes(req.user.role);
 };
 
 export const canManageTeams = (req: AuthenticatedRequest): boolean => {
-  return req.user?.role && [UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER].includes(req.user.role);
+  return !!req.user?.role && [UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER].includes(req.user.role);
 };
 
 export const canCreateTasks = (req: AuthenticatedRequest): boolean => {
-  return req.user?.role && [
+  return !!req.user?.role && [
     UserRole.OWNER,
     UserRole.ADMIN,
     UserRole.MANAGER,

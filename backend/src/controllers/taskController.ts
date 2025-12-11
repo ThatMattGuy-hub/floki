@@ -343,7 +343,7 @@ export const createTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
       throw new AppError(`Teams already assigned: ${existingIds.join(', ')}`, 400);
     }
 
-    const teamInserts = uniqueTeams.map((teamId: string) => ({
+    const teamInserts = (uniqueTeams as string[]).map((teamId: string) => ({
       task_id: task.id,
       team_id: teamId
     }));
@@ -485,7 +485,7 @@ export const updateTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
         throw new AppError('One or more team IDs are invalid', 400);
       }
 
-      const teamInserts = uniqueTeams.map((teamId: string) => ({
+      const teamInserts = (uniqueTeams as string[]).map((teamId: string) => ({
         task_id: id,
         team_id: teamId
       }));

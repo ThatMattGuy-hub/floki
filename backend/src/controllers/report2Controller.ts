@@ -231,7 +231,10 @@ export const runWidgetQuery = async (req: Request, res: Response) => {
 };
 
 // Helper function to transform query results into WidgetResult format
-function transformToWidgetResult(data: any[], dimensions: any[], metrics: any[]) {
+interface DimensionConfig { fieldId: string; label?: string; }
+interface MetricConfig { fieldId: string; label?: string; aggregation?: string; }
+
+function transformToWidgetResult(data: any[], dimensions: DimensionConfig[], metrics: MetricConfig[]) {
   if (!data || data.length === 0) {
     return { columns: [], rows: [] };
   }
@@ -257,7 +260,7 @@ function transformToWidgetResult(data: any[], dimensions: any[], metrics: any[])
       const grouped = groupAndAggregate(data, dimensions, metrics);
       const rows = grouped.map(group => [
         ...dimensions.map(d => {
-          const field = d.fieldId.split('.').pop();
+          const field = d.fieldId.split('.').pop() || d.fieldId;
           return group[field];
         }),
         ...metrics.map(() => group.count)
@@ -270,11 +273,11 @@ function transformToWidgetResult(data: any[], dimensions: any[], metrics: any[])
   const rows = data.slice(0, 100).map(row => {
     return [
       ...dimensions.map(d => {
-        const field = d.fieldId.split('.').pop();
+        const field = d.fieldId.split('.').pop() || d.fieldId;
         return row[field];
       }),
       ...metrics.map(m => {
-        const field = m.fieldId.split('.').pop();
+        const field = m.fieldId.split('.').pop() || m.fieldId;
         return row[field] || 0;
       })
     ];
@@ -284,20 +287,20 @@ function transformToWidgetResult(data: any[], dimensions: any[], metrics: any[])
 }
 
 // Helper to group and aggregate data
-function groupAndAggregate(data: any[], dimensions: any[], metrics: any[]) {
+function groupAndAggregate(data: any[], dimensions: DimensionConfig[], metrics: MetricConfig[]) {
   const groups: Record<string, any> = {};
 
   data.forEach(row => {
     const key = dimensions.map(d => {
-      const field = d.fieldId.split('.').pop();
+      const field = d.fieldId.split('.').pop() || d.fieldId;
       return row[field];
     }).join('|');
 
     if (!groups[key]) {
       groups[key] = {
         count: 0,
-        ...dimensions.reduce((acc, d) => {
-          const field = d.fieldId.split('.').pop();
+        ...dimensions.reduce((acc: Record<string, any>, d) => {
+          const field = d.fieldId.split('.').pop() || d.fieldId;
           acc[field] = row[field];
           return acc;
         }, {} as Record<string, any>)
