@@ -37,14 +37,6 @@
       </button>
     </form>
 
-    <div class="mt-6 text-center">
-      <p class="text-sm text-gray-600 dark:text-gray-400">
-        Don't have an account?
-        <NuxtLink to="/register" class="text-primary-600 dark:text-primary-400 hover:underline font-medium">
-          Register here
-        </NuxtLink>
-      </p>
-    </div>
   </div>
 </template>
 

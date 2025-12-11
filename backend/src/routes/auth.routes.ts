@@ -1,27 +1,18 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import {
-  register,
   login,
   logout,
   refreshToken,
   getCurrentUser,
   requestPasswordReset,
-  resetPassword
+  resetPassword,
+  changePassword
 } from '../controllers/authController';
 import { validate } from '../middleware/validation';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
-
-router.post(
-  '/register',
-  validate([
-    body('email').isEmail().withMessage('Valid email is required'),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-    body('full_name').notEmpty().withMessage('Full name is required')
-  ]),
-  register
-);
 
 router.post(
   '/login',
@@ -58,6 +49,16 @@ router.post(
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
   ]),
   resetPassword
+);
+
+router.post(
+  '/change-password',
+  authenticate,
+  validate([
+    body('current_password').notEmpty().withMessage('Current password is required'),
+    body('new_password').isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
+  ]),
+  changePassword
 );
 
 export default router;

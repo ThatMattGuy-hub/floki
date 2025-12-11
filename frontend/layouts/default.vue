@@ -142,6 +142,13 @@
             </svg>
             {{ colorMode.value === 'dark' ? 'Light' : 'Dark' }} Mode
           </button>
+
+          <button @click="showPasswordModal = true" class="w-full btn-secondary mb-2 text-sm">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            Change Password
+          </button>
           
           <button @click="handleLogout" class="w-full btn-secondary text-sm">
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,6 +158,66 @@
           </button>
         </div>
       </ClientOnly>
+
+      <!-- Change Password Modal -->
+      <div v-if="showPasswordModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="closePasswordModal">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
+          <h3 class="text-lg font-semibold mb-4">Change Password</h3>
+          
+          <form @submit.prevent="handleChangePassword" class="space-y-4">
+            <div v-if="passwordError" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+              {{ passwordError }}
+            </div>
+            
+            <div v-if="passwordSuccess" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
+              {{ passwordSuccess }}
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Current Password</label>
+              <input
+                v-model="currentPassword"
+                type="password"
+                required
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                placeholder="Enter current password"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">New Password</label>
+              <input
+                v-model="newPassword"
+                type="password"
+                required
+                minlength="8"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                placeholder="Enter new password (min 8 characters)"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Confirm New Password</label>
+              <input
+                v-model="confirmPassword"
+                type="password"
+                required
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+                placeholder="Confirm new password"
+              />
+            </div>
+
+            <div class="flex gap-3 pt-2">
+              <button type="button" @click="closePasswordModal" class="flex-1 btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" :disabled="changingPassword" class="flex-1 btn-primary">
+                {{ changingPassword ? 'Changing...' : 'Change Password' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </aside>
 
     <!-- Main content -->
@@ -164,6 +231,15 @@
 const authStore = useAuthStore()
 const colorMode = useColorMode()
 const router = useRouter()
+const { apiBaseUrl } = useRuntimeConfig().public
+
+const showPasswordModal = ref(false)
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const changingPassword = ref(false)
+const passwordError = ref('')
+const passwordSuccess = ref('')
 
 const toggleDarkMode = () => {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
@@ -172,6 +248,62 @@ const toggleDarkMode = () => {
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
+}
+
+const closePasswordModal = () => {
+  showPasswordModal.value = false
+  currentPassword.value = ''
+  newPassword.value = ''
+  confirmPassword.value = ''
+  passwordError.value = ''
+  passwordSuccess.value = ''
+}
+
+const handleChangePassword = async () => {
+  passwordError.value = ''
+  passwordSuccess.value = ''
+
+  if (newPassword.value !== confirmPassword.value) {
+    passwordError.value = 'New passwords do not match'
+    return
+  }
+
+  if (newPassword.value.length < 8) {
+    passwordError.value = 'New password must be at least 8 characters'
+    return
+  }
+
+  changingPassword.value = true
+
+  try {
+    const response = await $fetch('/auth/change-password', {
+      method: 'POST',
+      baseURL: apiBaseUrl,
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: {
+        current_password: currentPassword.value,
+        new_password: newPassword.value
+      }
+    })
+
+    if (response.success) {
+      passwordSuccess.value = 'Password changed successfully!'
+      currentPassword.value = ''
+      newPassword.value = ''
+      confirmPassword.value = ''
+      setTimeout(() => {
+        closePasswordModal()
+      }, 1500)
+    } else {
+      passwordError.value = response.error || 'Failed to change password'
+    }
+  } catch (error: any) {
+    passwordError.value = error.data?.error || 'Failed to change password'
+  } finally {
+    changingPassword.value = false
+  }
 }
 </script>
 

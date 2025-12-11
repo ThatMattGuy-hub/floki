@@ -240,3 +240,59 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   });
 });
 
+export const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const { current_password, new_password } = req.body;
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      error: 'Missing authorization header'
+    });
+  }
+
+  const token = authHeader.substring(7);
+
+  // First verify the current token is valid and get user
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+  
+  if (userError || !user) {
+    return res.status(401).json({
+      success: false,
+      error: 'Invalid token'
+    });
+  }
+
+  // Verify current password by attempting to sign in
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: current_password
+  });
+
+  if (signInError) {
+    return res.status(400).json({
+      success: false,
+      error: 'Current password is incorrect'
+    });
+  }
+
+  // Update to new password using admin API
+  const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+    user.id,
+    { password: new_password }
+  );
+
+  if (updateError) {
+    logger.error('Password change error:', updateError);
+    return res.status(400).json({
+      success: false,
+      error: 'Failed to change password'
+    });
+  }
+
+  res.json({
+    success: true,
+    message: 'Password changed successfully'
+  });
+});
+
