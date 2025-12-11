@@ -775,6 +775,7 @@ definePageMeta({
 const authStore = useAuthStore()
 const { apiFetch } = useApi()
 const route = useRoute()
+const router = useRouter()
 const { projectStatuses, loadProjectStatuses, getStatusColor, getStatusLabel } = useProjectStatuses()
 
 // Data
@@ -1007,8 +1008,13 @@ const closeModal = () => {
   selectedProject.value = null
 }
 
-const handleSaved = () => {
-  loadProjects()
+const handleSaved = (savedProject: any) => {
+  // If this was a new project creation (not an edit), navigate to its details page
+  if (!selectedProject.value && savedProject?.id) {
+    router.push(`/projects/${savedProject.id}`)
+  } else {
+    loadProjects()
+  }
 }
 
 // Label Editor

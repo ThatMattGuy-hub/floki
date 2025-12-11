@@ -33,7 +33,13 @@
           </div>
           <div class="flex items-center gap-2">
             <button @click="openEditModal" class="btn btn-secondary">Edit Project</button>
-            <NuxtLink :to="`/tasks?project_id=${project.id}`" class="btn btn-primary">View Tasks</NuxtLink>
+            <button @click="showTaskModal = true" class="btn btn-primary">
+              <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Create Task
+            </button>
+            <NuxtLink :to="`/tasks?project_id=${project.id}`" class="btn btn-secondary">View All Tasks</NuxtLink>
           </div>
         </div>
       </div>
@@ -79,10 +85,19 @@
                 </svg>
                 Tasks
               </span>
-              <NuxtLink :to="`/tasks?project_id=${project.id}`" class="text-sm text-blue-600 hover:text-blue-700">View All →</NuxtLink>
+              <div class="flex items-center gap-3">
+                <button @click="showTaskModal = true" class="text-sm text-green-600 hover:text-green-700 flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Task
+                </button>
+                <NuxtLink :to="`/tasks?project_id=${project.id}`" class="text-sm text-blue-600 hover:text-blue-700">View All →</NuxtLink>
+              </div>
             </h3>
             <div v-if="tasks.length === 0" class="text-center py-8 text-gray-500">
-              No tasks yet
+              <p>No tasks yet</p>
+              <button @click="showTaskModal = true" class="mt-2 text-sm text-blue-600 hover:text-blue-700">Create the first task</button>
             </div>
             <div v-else class="space-y-2">
               <div v-for="task in tasks.slice(0, 5)" :key="task.id" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -165,6 +180,9 @@
 
     <!-- Edit Modal -->
     <ProjectCreateModal :show="showEditModal" :project="project" @close="showEditModal = false" @saved="loadProject" />
+    
+    <!-- Task Create Modal -->
+    <TaskCreateModal :show="showTaskModal" :initial-project-id="project?.id" @close="showTaskModal = false" @created="onTaskCreated" />
   </div>
 </template>
 
@@ -181,6 +199,7 @@ const loading = ref(true)
 const project = ref<any>(null)
 const tasks = ref<any[]>([])
 const showEditModal = ref(false)
+const showTaskModal = ref(false)
 
 const colorOptions = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
@@ -240,6 +259,10 @@ const updateProject = async (updates: any) => {
 
 const openEditModal = () => {
   showEditModal.value = true
+}
+
+const onTaskCreated = () => {
+  loadTasks()
 }
 
 const formatDate = (dateStr: string) => {
