@@ -1,0 +1,38 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": [
+      "@types/node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "~~/*": ["./*"],
+      "@@/*": ["./*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.vue",
+    "**/*.tsx",
+    ".nuxt/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    ".nuxt",
+    "dist"
+  ]
+}
+

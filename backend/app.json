@@ -1,0 +1,73 @@
+{
+  "name": "floki-backend",
+  "description": "Floki Project Management System - Backend API",
+  "repository": "https://github.com/your-org/floki",
+  "keywords": ["node", "express", "typescript", "project-management"],
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/jontewks/puppeteer-heroku-buildpack"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment mode",
+      "value": "production"
+    },
+    "SUPABASE_URL": {
+      "description": "Supabase project URL",
+      "required": true
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Supabase anonymous/public key",
+      "required": true
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "description": "Supabase service role key (admin access)",
+      "required": true
+    },
+    "CORS_ORIGIN": {
+      "description": "Allowed CORS origin (frontend URL)",
+      "required": true
+    },
+    "REDIS_URL": {
+      "description": "Redis connection URL (auto-set by add-on)",
+      "required": false
+    },
+    "MEILISEARCH_HOST": {
+      "description": "Meilisearch host URL (optional)",
+      "required": false
+    },
+    "MEILISEARCH_API_KEY": {
+      "description": "Meilisearch API key (optional)",
+      "required": false
+    },
+    "SMTP_HOST": {
+      "description": "SMTP server host for email notifications",
+      "required": false
+    },
+    "SMTP_USER": {
+      "description": "SMTP username",
+      "required": false
+    },
+    "SMTP_PASSWORD": {
+      "description": "SMTP password",
+      "required": false
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-redis:mini",
+      "as": "REDIS"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+}
