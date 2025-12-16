@@ -145,7 +145,7 @@
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Product</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Owner</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Teams</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" @click="toggleSort('start_date')">
               Start Date
               <span v-if="sortBy === 'start_date'" class="ml-1">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
@@ -220,7 +220,13 @@
               <td class="px-6 py-4">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :style="getStatusStyle(project.status)">{{ getStatusLabel(project.status) }}</span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ project.owner?.full_name || project.owner?.email || '-' }}</td>
+              <td class="px-6 py-4">
+                <div v-if="project.teams?.length > 0" class="flex flex-wrap gap-1">
+                  <span v-for="pt in project.teams.slice(0, 2)" :key="pt.id" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="pt.team?.is_agency_team ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'">{{ pt.team?.name }}</span>
+                  <span v-if="project.teams.length > 2" class="text-xs text-gray-500">+{{ project.teams.length - 2 }}</span>
+                </div>
+                <span v-else class="text-gray-400 text-sm">-</span>
+              </td>
               <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                 <span v-if="project.start_date">{{ formatDate(project.start_date) }}</span>
                 <span v-else class="text-gray-400">-</span>
@@ -323,7 +329,13 @@
               <td class="px-6 py-4">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :style="getStatusStyle(project.status)">{{ getStatusLabel(project.status) }}</span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ project.owner?.full_name || project.owner?.email || '-' }}</td>
+              <td class="px-6 py-4">
+                <div v-if="project.teams?.length > 0" class="flex flex-wrap gap-1">
+                  <span v-for="pt in project.teams.slice(0, 2)" :key="pt.id" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="pt.team?.is_agency_team ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'">{{ pt.team?.name }}</span>
+                  <span v-if="project.teams.length > 2" class="text-xs text-gray-500">+{{ project.teams.length - 2 }}</span>
+                </div>
+                <span v-else class="text-gray-400 text-sm">-</span>
+              </td>
               <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                 <span v-if="project.start_date">{{ formatDate(project.start_date) }}</span>
                 <span v-else class="text-gray-400">-</span>
@@ -400,7 +412,13 @@
               <td class="px-6 py-4">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" :style="getStatusStyle(project.status)">{{ getStatusLabel(project.status) }}</span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-500">{{ project.owner?.full_name || project.owner?.email || '-' }}</td>
+              <td class="px-6 py-4">
+                <div v-if="project.teams?.length > 0" class="flex flex-wrap gap-1">
+                  <span v-for="pt in project.teams.slice(0, 2)" :key="pt.id" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium opacity-60" :class="pt.team?.is_agency_team ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'">{{ pt.team?.name }}</span>
+                  <span v-if="project.teams.length > 2" class="text-xs text-gray-500">+{{ project.teams.length - 2 }}</span>
+                </div>
+                <span v-else class="text-gray-400 text-sm">-</span>
+              </td>
               <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-500">
                 <span v-if="project.start_date">{{ formatDate(project.start_date) }}</span>
                 <span v-else class="text-gray-400">-</span>
@@ -457,8 +475,12 @@
                   {{ getStatusLabel(project.status) }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                {{ project.owner?.full_name || project.owner?.email || '-' }}
+              <td class="px-6 py-4">
+                <div v-if="project.teams?.length > 0" class="flex flex-wrap gap-1">
+                  <span v-for="pt in project.teams.slice(0, 2)" :key="pt.id" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="pt.team?.is_agency_team ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'">{{ pt.team?.name }}</span>
+                  <span v-if="project.teams.length > 2" class="text-xs text-gray-500">+{{ project.teams.length - 2 }}</span>
+                </div>
+                <span v-else class="text-gray-400 text-sm">-</span>
               </td>
               <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                 <span v-if="project.start_date">{{ formatDate(project.start_date) }}</span>

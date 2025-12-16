@@ -9,7 +9,13 @@ import {
   updateProjectPriorities,
   getProjectLabels,
   addProjectLabel,
-  removeProjectLabel
+  removeProjectLabel,
+  getProjectTeams,
+  addProjectTeam,
+  removeProjectTeam,
+  getProjectProducts,
+  addProjectProduct,
+  removeProjectProduct
 } from '../controllers/projectController';
 
 const router = Router();
@@ -28,6 +34,16 @@ router.post('/priorities', updateProjectPriorities);
 router.get('/:id/labels', getProjectLabels);
 router.post('/:id/labels', addProjectLabel);
 router.delete('/:id/labels/:label_id', removeProjectLabel);
+
+// Project Teams
+router.get('/:id/teams', getProjectTeams);
+router.post('/:id/teams', addProjectTeam);
+router.delete('/:id/teams/:team_id', removeProjectTeam);
+
+// Project Products
+router.get('/:id/products', getProjectProducts);
+router.post('/:id/products', addProjectProduct);
+router.delete('/:id/products/:product_id', removeProjectProduct);
 
 export default router;
 

@@ -21,7 +21,7 @@ export const getProjects = async (req: AuthenticatedRequest, res: Response, next
     // Build query
     let query = supabaseAdmin
       .from('projects')
-      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name), labels:project_labels(id, label:labels(*))');
+      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name), labels:project_labels(id, label:labels(*)), teams:project_teams(team:teams(*)), products:project_products(product:products(*), is_primary)');
 
     // Apply filters (handle array values by taking first element)
     if (product_id) {
@@ -121,7 +121,7 @@ export const getProjectById = async (req: AuthenticatedRequest, res: Response, n
 
     const { data, error } = await supabaseAdmin
       .from('projects')
-      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name)')
+      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name), teams:project_teams(team:teams(*)), products:project_products(product:products(*), is_primary)')
       .eq('id', id)
       .single();
 
@@ -150,7 +150,7 @@ export const createProject = async (req: AuthenticatedRequest, res: Response, ne
       });
     }
 
-    const { product_id, name, description, owner_id, status } = req.body;
+    const { product_id, name, description, owner_id, status, teams = [], products = [] } = req.body;
 
     const { data, error } = await supabaseAdmin
       .from('projects')
@@ -166,12 +166,38 @@ export const createProject = async (req: AuthenticatedRequest, res: Response, ne
 
     if (error) throw error;
 
+    // Add teams to project
+    if (teams.length > 0) {
+      const teamInserts = teams.map((teamId: string) => ({
+        project_id: data.id,
+        team_id: teamId
+      }));
+      await supabaseAdmin.from('project_teams').insert(teamInserts);
+    }
+
+    // Add products to project (in addition to primary product_id)
+    if (products.length > 0) {
+      const productInserts = products.map((productId: string, index: number) => ({
+        project_id: data.id,
+        product_id: productId,
+        is_primary: index === 0 && !product_id
+      }));
+      await supabaseAdmin.from('project_products').insert(productInserts);
+    }
+
+    // Fetch full project with relations
+    const { data: fullProject } = await supabaseAdmin
+      .from('projects')
+      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name), teams:project_teams(team:teams(*)), products:project_products(product:products(*), is_primary)')
+      .eq('id', data.id)
+      .single();
+
     await logActivity(userId, 'project_created', 'projects', data.id, {
       project_name: name,
       product_id
     });
 
-    res.status(201).json({ success: true, data });
+    res.status(201).json({ success: true, data: fullProject || data });
   } catch (error) {
     next(error);
   }
@@ -238,7 +264,7 @@ export const updateProject = async (req: AuthenticatedRequest, res: Response, ne
       .from('projects')
       .update(updates)
       .eq('id', id)
-      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name)')
+      .select('*, product:products(id, name), owner:users!owner_id(id, email, full_name), teams:project_teams(team:teams(*)), products:project_products(product:products(*), is_primary)')
       .single();
 
     if (error) throw error;
@@ -376,6 +402,116 @@ export const removeProjectLabel = async (req: AuthenticatedRequest, res: Respons
     if (error) throw error;
 
     res.json({ success: true, message: 'Label removed successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Project Teams
+export const getProjectTeams = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabaseAdmin
+      .from('project_teams')
+      .select('*, team:teams(*)')
+      .eq('project_id', id);
+
+    if (error) throw error;
+
+    res.json({ success: true, data: data || [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addProjectTeam = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { team_id } = req.body;
+
+    const { data, error } = await supabaseAdmin
+      .from('project_teams')
+      .insert({ project_id: id, team_id })
+      .select('*, team:teams(*)')
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeProjectTeam = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id, team_id } = req.params;
+
+    const { error } = await supabaseAdmin
+      .from('project_teams')
+      .delete()
+      .eq('project_id', id)
+      .eq('team_id', team_id);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Team removed successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Project Products (multiple products per project)
+export const getProjectProducts = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabaseAdmin
+      .from('project_products')
+      .select('*, product:products(*)')
+      .eq('project_id', id);
+
+    if (error) throw error;
+
+    res.json({ success: true, data: data || [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addProjectProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { product_id, is_primary = false } = req.body;
+
+    const { data, error } = await supabaseAdmin
+      .from('project_products')
+      .insert({ project_id: id, product_id, is_primary })
+      .select('*, product:products(*)')
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeProjectProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id, product_id } = req.params;
+
+    const { error } = await supabaseAdmin
+      .from('project_products')
+      .delete()
+      .eq('project_id', id)
+      .eq('product_id', product_id);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Product removed successfully' });
   } catch (error) {
     next(error);
   }

@@ -74,6 +74,12 @@
                 <div class="bg-blue-600 h-2 rounded-full transition-all" :style="{ width: taskProgress + '%' }"></div>
               </div>
             </div>
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <label class="block text-sm font-medium text-gray-500">Total Estimated Hours</label>
+                <span class="text-sm font-medium">{{ totalEstimatedHours }} hours</span>
+              </div>
+            </div>
           </div>
 
           <!-- Tasks Summary -->
@@ -100,16 +106,60 @@
               <button @click="showTaskModal = true" class="mt-2 text-sm text-blue-600 hover:text-blue-700">Create the first task</button>
             </div>
             <div v-else class="space-y-2">
-              <div v-for="task in tasks.slice(0, 5)" :key="task.id" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div class="flex items-center gap-3">
-                  <span class="w-2 h-2 rounded-full" :class="getTaskStatusColor(task.status?.name)"></span>
-                  <NuxtLink :to="`/tasks/${task.id}`" class="font-medium hover:text-blue-600">{{ task.title }}</NuxtLink>
+              <div v-for="task in tasks" :key="task.id" class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" :class="getTaskStatusColor(task.status?.name)"></span>
+                    <NuxtLink :to="`/tasks/${task.id}`" class="font-medium hover:text-blue-600 truncate">{{ task.title }}</NuxtLink>
+                  </div>
+                  <select 
+                    :value="task.status_id" 
+                    @change="updateTaskStatus(task.id, ($event.target as HTMLSelectElement).value)"
+                    class="ml-2 text-sm px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer flex-shrink-0"
+                    :style="{ borderColor: task.status?.color, color: task.status?.color }"
+                  >
+                    <option v-for="status in taskStatuses" :key="status.id" :value="status.id">
+                      {{ status.name }}
+                    </option>
+                  </select>
                 </div>
-                <span class="text-sm text-gray-500">{{ task.status?.name }}</span>
+                <!-- Task Details Row -->
+                <div class="mt-2 flex items-center gap-4 flex-wrap pl-5 text-xs text-gray-500 dark:text-gray-400">
+                  <!-- Assignee -->
+                  <div class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>{{ task.assignee?.full_name || task.assignee?.email || 'Unassigned' }}</span>
+                  </div>
+                  <!-- Due Date -->
+                  <div v-if="task.due_date" class="flex items-center gap-1" :class="isOverdue(task.due_date) ? 'text-red-500' : ''">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ formatShortDate(task.due_date) }}</span>
+                  </div>
+                  <!-- Estimated Hours -->
+                  <div v-if="task.estimated_hours" class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{{ task.estimated_hours }}h</span>
+                  </div>
+                </div>
+                <!-- Teams Row -->
+                <div v-if="task.teams && task.teams.length > 0" class="mt-2 flex items-center gap-2 flex-wrap pl-5">
+                  <span class="text-xs text-gray-500">Teams:</span>
+                  <span 
+                    v-for="teamItem in [...task.teams].sort((a, b) => a.team.name.localeCompare(b.team.name))" 
+                    :key="teamItem.team.id"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                    :class="teamItem.team.is_agency_team ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'"
+                  >
+                    {{ teamItem.team.name }}
+                  </span>
+                </div>
               </div>
-              <p v-if="tasks.length > 5" class="text-sm text-gray-500 text-center pt-2">
-                And {{ tasks.length - 5 }} more tasks...
-              </p>
             </div>
           </div>
         </div>
@@ -120,6 +170,18 @@
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold mb-4">Details</h3>
             <dl class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Description</dt>
+                <dd class="mt-1">
+                  <textarea 
+                    v-model="project.description" 
+                    @blur="updateProject({ description: project.description })"
+                    rows="3"
+                    class="input w-full text-sm resize-none"
+                    placeholder="Add a project description..."
+                  ></textarea>
+                </dd>
+              </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Product</dt>
                 <dd class="mt-1">{{ project.product?.name || 'None' }}</dd>
@@ -149,6 +211,18 @@
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold mb-4">Labels</h3>
             <ProjectLabels :project-id="project.id" />
+          </div>
+
+          <!-- Teams Card -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">Teams</h3>
+            <ProjectTeams :project-id="project.id" />
+          </div>
+
+          <!-- Products Card -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">Products</h3>
+            <ProjectProducts :project-id="project.id" />
           </div>
 
           <!-- Roadmap Color -->
@@ -198,6 +272,7 @@ const { projectStatuses, loadProjectStatuses, getStatusColor, getStatusLabel } =
 const loading = ref(true)
 const project = ref<any>(null)
 const tasks = ref<any[]>([])
+const taskStatuses = ref<any[]>([])
 const showEditModal = ref(false)
 const showTaskModal = ref(false)
 
@@ -221,6 +296,10 @@ const taskProgress = computed(() => {
   return Math.round((completedTasks.value / totalTasks.value) * 100)
 })
 
+const totalEstimatedHours = computed(() => {
+  return tasks.value.reduce((sum: number, task: any) => sum + (task.estimated_hours || 0), 0)
+})
+
 const loadProject = async () => {
   loading.value = true
   try {
@@ -241,6 +320,33 @@ const loadTasks = async () => {
     tasks.value = response.data || []
   } catch (error) {
     console.error('Failed to load tasks:', error)
+  }
+}
+
+const loadTaskStatuses = async () => {
+  try {
+    const response = await apiFetch('/statuses')
+    taskStatuses.value = response.data || []
+  } catch (error) {
+    console.error('Failed to load statuses:', error)
+  }
+}
+
+const updateTaskStatus = async (taskId: string, statusId: string) => {
+  try {
+    await apiFetch(`/tasks/${taskId}`, {
+      method: 'PATCH',
+      body: { status_id: statusId }
+    })
+    // Update local task status
+    const task = tasks.value.find(t => t.id === taskId)
+    if (task) {
+      task.status_id = statusId
+      task.status = taskStatuses.value.find(s => s.id === statusId)
+    }
+  } catch (error) {
+    console.error('Failed to update task status:', error)
+    alert('Failed to update task status')
   }
 }
 
@@ -270,6 +376,16 @@ const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+const formatShortDate = (dateStr: string) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+const isOverdue = (dateStr: string) => {
+  if (!dateStr) return false
+  return new Date(dateStr) < new Date()
+}
+
 const getStatusStyle = (slug: string) => {
   const color = getStatusColor(slug)
   return {
@@ -291,5 +407,6 @@ onMounted(async () => {
   await loadProjectStatuses()
   loadProject()
   loadTasks()
+  loadTaskStatuses()
 })
 </script>

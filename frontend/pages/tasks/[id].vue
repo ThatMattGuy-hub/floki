@@ -270,7 +270,7 @@
                   <label class="text-sm text-gray-600 dark:text-gray-400">Project</label>
                 </Tooltip>
                 <div class="mt-1">
-                  <NuxtLink :to="`/projects`" class="text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                  <NuxtLink :to="`/projects/${task.project_id}`" class="text-blue-600 hover:text-blue-700 dark:text-blue-400">
                     {{ task.project?.name || 'Unknown' }}
                   </NuxtLink>
                 </div>
@@ -563,6 +563,12 @@ const saveStatus = async () => {
       const result = await tasksStore.updateTask(task.value.id, { status_id: editStatus.value || null })
       if (result.success) {
         await handleTaskUpdated(result.data)
+        // Also set the status object from the statuses list since API may not return it
+        if (editStatus.value) {
+          task.value.status = statuses.value.find((s: any) => s.id === editStatus.value) || null
+        } else {
+          task.value.status = null
+        }
       }
     } catch (error) {
       console.error('Failed to update status:', error)
@@ -585,6 +591,8 @@ const savePriority = async () => {
       const result = await tasksStore.updateTask(task.value.id, { priority: editPriority.value })
       if (result.success) {
         await handleTaskUpdated(result.data)
+        // Also directly set the priority value since API may not return it
+        task.value.priority = editPriority.value
       }
     } catch (error) {
       console.error('Failed to update priority:', error)
@@ -607,6 +615,12 @@ const saveAssignee = async () => {
       const result = await tasksStore.updateTask(task.value.id, { assignee_id: editAssignee.value || null })
       if (result.success) {
         await handleTaskUpdated(result.data)
+        // Also set the assignee object from the users list since API may not return it
+        if (editAssignee.value) {
+          task.value.assignee = users.value.find((u: any) => u.id === editAssignee.value) || null
+        } else {
+          task.value.assignee = null
+        }
       }
     } catch (error) {
       console.error('Failed to update assignee:', error)
@@ -675,7 +689,15 @@ const cancelEditEstimatedHours = () => {
 
 const handleTaskUpdated = async (updatedTask?: any) => {
   if (updatedTask) {
-    task.value = updatedTask
+    // Merge updated task with existing data to preserve nested objects (status, project, product, assignee)
+    // that may not be returned in the PATCH response
+    task.value = { ...task.value, ...updatedTask }
+    
+    // Update specific nested objects if they were returned
+    if (updatedTask.status) task.value.status = updatedTask.status
+    if (updatedTask.project) task.value.project = updatedTask.project
+    if (updatedTask.product) task.value.product = updatedTask.product
+    if (updatedTask.assignee !== undefined) task.value.assignee = updatedTask.assignee
   } else {
     // Reload to get fresh data
     try {

@@ -55,6 +55,34 @@
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Only "Ongoing" projects appear in priorities and task counts</p>
         </div>
 
+        <div>
+          <label class="block text-sm font-medium mb-2">Teams</label>
+          <select
+            v-model="form.teams"
+            multiple
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 min-h-[100px]"
+          >
+            <option v-for="team in teams" :key="team.id" :value="team.id">
+              {{ team.name }}
+            </option>
+          </select>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Hold Ctrl/Cmd to select multiple teams</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Additional Products</label>
+          <select
+            v-model="form.products"
+            multiple
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 min-h-[100px]"
+          >
+            <option v-for="product in products" :key="product.id" :value="product.id">
+              {{ product.name }}
+            </option>
+          </select>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Select additional products this project relates to (besides primary product above)</p>
+        </div>
+
         <div v-if="project" class="text-sm text-gray-500 dark:text-gray-400">
           <p>Created: {{ formatDate(project.created_at) }}</p>
         </div>
@@ -86,13 +114,16 @@ const loading = ref(false)
 const error = ref('')
 const products = ref([])
 const users = ref([])
+const teams = ref([])
 
 const form = ref({
   product_id: '',
   name: '',
   description: '',
   owner_id: '',
-  status: 'ongoing'
+  status: 'ongoing',
+  teams: [] as string[],
+  products: [] as string[]
 })
 
 watch(() => props.project, (newProject) => {
@@ -102,7 +133,9 @@ watch(() => props.project, (newProject) => {
       name: newProject.name || '',
       description: newProject.description || '',
       owner_id: newProject.owner_id || newProject.owner?.id || '',
-      status: newProject.status || 'ongoing'
+      status: newProject.status || 'ongoing',
+      teams: newProject.teams?.map((t: any) => t.team?.id || t.team_id) || [],
+      products: newProject.products?.map((p: any) => p.product?.id || p.product_id) || []
     }
   } else {
     form.value = {
@@ -110,7 +143,9 @@ watch(() => props.project, (newProject) => {
       name: '',
       description: '',
       owner_id: authStore.user?.id || '',
-      status: 'ongoing'
+      status: 'ongoing',
+      teams: [],
+      products: []
     }
   }
 }, { immediate: true })
@@ -119,6 +154,7 @@ watch(() => props.show, (newVal) => {
   if (newVal) {
     loadProducts()
     loadUsers()
+    loadTeams()
   }
 })
 
@@ -137,6 +173,15 @@ const loadUsers = async () => {
     users.value = response.data || []
   } catch (err) {
     console.error('Failed to load users:', err)
+  }
+}
+
+const loadTeams = async () => {
+  try {
+    const response = await apiFetch('/teams')
+    teams.value = response.data || []
+  } catch (err) {
+    console.error('Failed to load teams:', err)
   }
 }
 
@@ -171,7 +216,7 @@ const handleSubmit = async () => {
     if (response.success) {
       emit('saved', response.data)
       emit('close')
-      form.value = { product_id: '', name: '', description: '', owner_id: '', status: 'ongoing' }
+      form.value = { product_id: '', name: '', description: '', owner_id: '', status: 'ongoing', teams: [], products: [] }
     } else {
       error.value = response.error || 'Failed to save project'
     }
