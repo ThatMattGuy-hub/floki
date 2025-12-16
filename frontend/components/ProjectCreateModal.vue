@@ -111,9 +111,9 @@ const authStore = useAuthStore()
 const { projectStatuses, loadProjectStatuses, getDefaultStatus } = useProjectStatuses()
 const loading = ref(false)
 const error = ref('')
-const products = ref([])
-const users = ref([])
-const teams = ref([])
+const products = ref<any[]>([])
+const users = ref<any[]>([])
+const teams = ref<any[]>([])
 
 const form = ref({
   product_id: '',
