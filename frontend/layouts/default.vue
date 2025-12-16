@@ -310,7 +310,7 @@ const handleChangePassword = async () => {
   changingPassword.value = true
 
   try {
-    const response = await $fetch('/auth/change-password', {
+    const response = await $fetch<{ success: boolean; error?: string }>('/auth/change-password', {
       method: 'POST',
       baseURL: apiBaseUrl,
       headers: {

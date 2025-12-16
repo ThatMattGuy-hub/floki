@@ -46,13 +46,11 @@
         <div>
           <label class="block text-sm font-medium mb-2">Status</label>
           <select v-model="form.status" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-            <option value="ongoing">Ongoing</option>
-            <option value="on_hold">On Hold</option>
-            <option value="blocked">Blocked</option>
-            <option value="done">Done</option>
-            <option value="cancelled">Cancelled</option>
+            <option v-for="status in projectStatuses" :key="status.slug" :value="status.slug">
+              {{ status.name }}
+            </option>
           </select>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Only "Ongoing" projects appear in priorities and task counts</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Only active (non-closed) projects appear in priorities and task counts</p>
         </div>
 
         <div>
@@ -110,6 +108,7 @@ const emit = defineEmits(['close', 'saved'])
 
 const { apiFetch } = useApi()
 const authStore = useAuthStore()
+const { projectStatuses, loadProjectStatuses, getDefaultStatus } = useProjectStatuses()
 const loading = ref(false)
 const error = ref('')
 const products = ref([])
@@ -150,11 +149,19 @@ watch(() => props.project, (newProject) => {
   }
 }, { immediate: true })
 
-watch(() => props.show, (newVal) => {
+watch(() => props.show, async (newVal) => {
   if (newVal) {
     loadProducts()
     loadUsers()
     loadTeams()
+    await loadProjectStatuses()
+    // Set default status for new projects
+    if (!props.project) {
+      const defaultStatus = getDefaultStatus()
+      if (defaultStatus) {
+        form.value.status = defaultStatus.slug
+      }
+    }
   }
 })
 
